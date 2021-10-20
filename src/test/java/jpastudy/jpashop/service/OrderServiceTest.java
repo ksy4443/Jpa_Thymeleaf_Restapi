@@ -1,9 +1,6 @@
 package jpastudy.jpashop.service;
 
-import jpastudy.jpashop.domain.Address;
-import jpastudy.jpashop.domain.Member;
-import jpastudy.jpashop.domain.Order;
-import jpastudy.jpashop.domain.OrderStatus;
+import jpastudy.jpashop.domain.*;
 import jpastudy.jpashop.domain.item.Book;
 import jpastudy.jpashop.domain.item.Item;
 import jpastudy.jpashop.exception.NotEnoughStockException;
@@ -15,6 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+
+import java.util.List;
 
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertNotNull;
@@ -30,6 +29,21 @@ class OrderServiceTest {
 
     @Autowired
     OrderRepository orderRepository;
+
+    @Test
+    public void 주문검색() throws Exception {
+        Member member = createMember("몽타", new Address("서울", "동작", "12345"));
+        Item item = createBook("부트책", 10000, 10);
+        int orderCnt = 3;
+
+        Long orderId = orderService.order(member.getId(), item.getId(), orderCnt);
+
+        OrderSearch search = new OrderSearch();
+        search.setMemberName("몽");
+        search.setOrderStatus(OrderStatus.ORDER);
+        List<Order> orders = orderService.findOrders(search);
+        assertEquals("검색된 Order 갯수", 1, orders.size());
+    }
 
     @Test
     public  void 상품주문() throws Exception {
