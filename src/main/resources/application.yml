@@ -16,5 +16,5 @@ logging.level:
   org.hibernate.sql: debug
   #org.hibernate.type: trace
 
-sever:
+server:
   port: 8087
