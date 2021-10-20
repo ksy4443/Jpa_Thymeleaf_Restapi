@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 
 import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertNotNull;
 
 @SpringBootTest
 @Transactional
@@ -37,6 +38,7 @@ class OrderServiceTest {
         int orderCnt = 3;
 
         Long orderId = orderService.order(member.getId(), item.getId(), orderCnt);
+
         Order getOrder = orderRepository.findOne(orderId);
         assertEquals("상품 주문시 상태는 ORDER", OrderStatus.ORDER, getOrder.getStatus());
         assertEquals("주문한 상품 종류 수가 정확해야 한다.",1, getOrder.getOrderItems().size());
@@ -57,6 +59,7 @@ class OrderServiceTest {
                     orderService.order(member.getId(), item.getId(), orderCount);
                 });
         //Then
+        assertNotNull("NotEnoughStockException 발생", exception);
         assertEquals("재고수량이 부족함","need more stock",exception.getMessage());
     }
 
