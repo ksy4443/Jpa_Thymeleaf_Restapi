@@ -53,4 +53,13 @@ public class OrderRepository {
         }
         return QOrder.order.status.eq(orderStatus);
     }
+    
+    //성능 최적화를 위하여 Fectch Join 사용
+    public List<Order> findAllWithMemberDelivery() {
+        return em.createQuery(
+                        "select o from Order o" +
+                                " join fetch o.member m" +
+                                " join fetch o.delivery d", Order.class)
+                .getResultList();
+    }
 }
