@@ -5,6 +5,8 @@ import jpastudy.jpashop.domain.Order;
 import jpastudy.jpashop.domain.OrderSearch;
 import jpastudy.jpashop.domain.OrderStatus;
 import jpastudy.jpashop.repository.OrderRepository;
+import jpastudy.jpashop.repository.order.simplequery.OrderSimpleQueryDto;
+import jpastudy.jpashop.repository.order.simplequery.OrderSimpleQueryRepository;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +25,7 @@ import static java.util.stream.Collectors.toList;
 @RequiredArgsConstructor
 public class OrderSimpleApiController {
     private final OrderRepository orderRepository;
+    private final OrderSimpleQueryRepository orderSimpleQueryRepository;
 
     @GetMapping("/api/v1/simple-orders")
     public List<Order> ordersV1() {
@@ -61,6 +64,18 @@ public class OrderSimpleApiController {
                 .collect(toList());
         return result;
     }
+
+    /**
+     * V4. Query 결과를 엔티티 대신 DTO에 저장하여 조회
+     * - 쿼리 1번 호출
+     * - select 절에서 원하는 데이터만 선택해서 조회
+     * - DTO가 너무 많아지게 되는 단점이 있다
+     */
+    @GetMapping("/api/v4/simple-orders")
+    public List<OrderSimpleQueryDto> ordersV4() {
+        return orderSimpleQueryRepository.findOrderDtos();
+    }
+
 
     //-------------응답과 요청에 사용할 DTO Inner Class 선언
     @Data
