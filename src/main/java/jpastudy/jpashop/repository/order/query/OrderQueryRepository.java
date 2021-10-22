@@ -86,5 +86,42 @@ public class OrderQueryRepository {
         orders.forEach(order -> order.setOrderItems(orderItemMap.get(order.getOrderId())));
         return orders;
     }
+
+
+    public List<OrderQueryDto> findOrdersQueryDtos_optimaize_after() {
+        //Order, ToOne 관계인 Member, Delivery를 조회하기
+        List<OrderQueryDto> orders = findOrders();
+
+        //Order, ToMany 관계인 OrderItem, Item을 조회하기
+        //조회한 OrderItem을 OrderId를 key 값인 Map에 저장하기
+        Map<Long, List<OrderItemQueryDto>> orderItemMap = getOrderItemMap(getOrderIds(orders));
+
+        //Map에서 OrderId와 매핑하는 OrderItem 리스트를 Order에 연결해주기
+        orders.forEach(order -> order.setOrderItems(orderItemMap.get(order.getOrderId())));
+        return orders;
+    }
+
+    private Map<Long, List<OrderItemQueryDto>> getOrderItemMap(List<Long> orderIds) {
+        List<OrderItemQueryDto> orderItems = em.createQuery(
+                        "select new jpastudy.jpashop.repository.order.query.OrderItemQueryDto(oi.order.id, i.name, oi.orderPrice, oi.count)" +
+                                " from OrderItem oi" +
+                                " join oi.item i" +
+                                " where oi.order.id in :orderIds", OrderItemQueryDto.class)
+                .setParameter("orderIds", orderIds)
+                .getResultList();
+
+        //Map<Long, List<OrderItemQueryDto>>
+        //Map<OrderId(주문번호), OrderItemQueryDto목록>
+        return orderItems.stream() //Stream<OrderIteQueryDto>
+                .collect(Collectors.groupingBy(orderItem -> orderItem.getOrderId()));
+    }
+
+    private List<Long> getOrderIds(List<OrderQueryDto> orders) {
+        //OrderId 목록을 List<Long> 형태로 추출하기
+        //List<OrderQueryDto> --> List<Long>
+        return orders.stream()     //Stream<OrderQueryDto>
+                .map(order -> order.getOrderId())   //Stream<Long>
+                .collect(Collectors.toList());
+    }
 }
 
